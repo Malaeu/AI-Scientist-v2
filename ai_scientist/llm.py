@@ -22,6 +22,7 @@ AVAILABLE_LLMS = [
     "o1-mini-2024-09-12",
     "o3-mini",
     "deepseek-coder-v2-0724",
+    "deepcoder-14b",
     "llama3.1-405b",
     # Anthropic Claude models via Amazon Bedrock
     "bedrock/anthropic.claude-3-sonnet-20240229-v1:0",
@@ -106,6 +107,22 @@ def get_batch_responses_from_llm(
         new_msg_history = [
             new_msg_history + [{"role": "assistant", "content": c}] for c in content
         ]
+    elif model == "deepcoder-14b":
+        # For DeepCoder, we'll handle each response individually since batch responses might not be supported
+        content = []
+        new_msg_history = []
+        for _ in range(n_responses):
+            c, hist = get_response_from_llm(
+                msg,
+                client,
+                model,
+                system_message,
+                print_debug=False,
+                msg_history=msg_history,
+                temperature=temperature,
+            )
+            content.append(c)
+            new_msg_history.append(hist)
     elif model == "llama-3-1-405b-instruct":
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
         response = client.chat.completions.create(
@@ -272,6 +289,50 @@ def get_response_from_llm(
         )
         content = response.choices[0].message.content
         new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
+    elif model == "deepcoder-14b":
+        new_msg_history = msg_history + [{"role": "user", "content": msg}]
+        try:
+            response = client.chat.completions.create(
+                model="agentica-org/DeepCoder-14B-Preview",
+                messages=[
+                    {"role": "system", "content": system_message},
+                    *new_msg_history,
+                ],
+                temperature=temperature,
+                max_tokens=MAX_NUM_TOKENS,
+                n=1,
+                stop=None,
+            )
+            content = response.choices[0].message.content
+        except Exception as e:
+            # Fallback to direct API call if OpenAI client doesn't work with HuggingFace
+            import requests
+            headers = {
+                "Authorization": f"Bearer {os.environ['HUGGINGFACE_API_KEY']}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "inputs": {
+                    "system": system_message,
+                    "messages": [{"role": m["role"], "content": m["content"]} for m in new_msg_history]
+                },
+                "parameters": {
+                    "temperature": temperature,
+                    "max_new_tokens": MAX_NUM_TOKENS,
+                    "return_full_text": False
+                }
+            }
+            response = requests.post(
+                "https://api-inference.huggingface.co/models/agentica-org/DeepCoder-14B-Preview",
+                headers=headers,
+                json=payload
+            )
+            if response.status_code == 200:
+                content = response.json()["generated_text"]
+            else:
+                raise ValueError(f"Error from HuggingFace API: {response.text}")
+        
+        new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
     elif model in ["meta-llama/llama-3.1-405b-instruct", "llama-3-1-405b-instruct"]:
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
         response = client.chat.completions.create(
@@ -354,6 +415,18 @@ def create_client(model) -> tuple[Any, str]:
             openai.OpenAI(
                 api_key=os.environ["DEEPSEEK_API_KEY"],
                 base_url="https://api.deepseek.com",
+            ),
+            model,
+        )
+    elif model == "deepcoder-14b":
+        print(f"Using HuggingFace API with {model}.")
+        # Using OpenAI client with HuggingFace API
+        if "HUGGINGFACE_API_KEY" not in os.environ:
+            raise ValueError("HUGGINGFACE_API_KEY environment variable not set")
+        return (
+            openai.OpenAI(
+                api_key=os.environ["HUGGINGFACE_API_KEY"],
+                base_url="https://api-inference.huggingface.co/models/agentica-org/DeepCoder-14B-Preview",
             ),
             model,
         )
