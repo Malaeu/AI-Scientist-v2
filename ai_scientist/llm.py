@@ -107,22 +107,6 @@ def get_batch_responses_from_llm(
         new_msg_history = [
             new_msg_history + [{"role": "assistant", "content": c}] for c in content
         ]
-    elif model == "deepcoder-14b":
-        # For DeepCoder, we'll handle each response individually since batch responses might not be supported
-        content = []
-        new_msg_history = []
-        for _ in range(n_responses):
-            c, hist = get_response_from_llm(
-                msg,
-                client,
-                model,
-                system_message,
-                print_debug=False,
-                msg_history=msg_history,
-                temperature=temperature,
-            )
-            content.append(c)
-            new_msg_history.append(hist)
     elif model == "llama-3-1-405b-instruct":
         new_msg_history = msg_history + [{"role": "user", "content": msg}]
         response = client.chat.completions.create(
