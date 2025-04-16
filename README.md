@@ -234,7 +234,6 @@ Once the initial experimental stage is complete, you will find a timestamped log
 | o3-2025-04-16               | $10.00     | $40.00      | 200,000       | 100,000    | Most powerful, robust      |
 | claude-3-7-sonnet-20250219  | (see Anthropic pricing) | (see Anthropic pricing) | Large         | Large      | Latest Claude Sonnet       |
 
-- See [OpenAI Pricing](https://openai.com/pricing) and [Anthropic Pricing](https://docs.anthropic.com/claude/docs/pricing) for up-to-date details.
 
 ---
 
@@ -250,6 +249,19 @@ By default, the ideation script (`perform_ideation_temp_free.py`) generates **on
 python ai_scientist/perform_ideation_temp_free.py \
   --workshop-file ai_scientist/ideas/deep_understanding_mqb.md \
   --max-num-generations 5
+
+
+----
+
+
+```bibtex
+@article{aiscientist_v2,
+  title={The AI Scientist-v2: Workshop-Level Automated Scientific Discovery via Agentic Tree Search},
+  author={Yamada, Yutaro and Lange, Robert Tjarko and Lu, Cong and Hu, Shengran and Lu, Chris and Foerster, Jakob and Clune, Jeff and Ha, David},
+  journal={arXiv preprint arXiv:2504.08066},
+  year={2025}
+}
+
 ```
 
 This will generate 5 distinct proposals and store them in the same JSON file. Adjust the number as needed for your workflow.
