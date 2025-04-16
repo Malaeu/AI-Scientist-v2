@@ -302,7 +302,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--workshop-file",
         type=str,
-        default="experimental/workshops/i_cant_believe_its_not_better.md",
+        default="ideas/i_cant_believe_its_not_better.md",
         help="Path to the workshop description file.",
     )
     parser.add_argument(
