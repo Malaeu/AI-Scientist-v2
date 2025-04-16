@@ -1,7 +1,11 @@
 ## ✅ How to Check Proper Installation (No Conda Required!)
 
 Before running AI Scientist-v2, make sure the following tools and libraries are installed and available in your environment:
-=======
+
+
+----
+
+
 <p align="center">
   📚 <a href="https://pub.sakana.ai/ai-scientist-v2/paper">[Paper]</a> |
   📝 <a href="https://sakana.ai/ai-scientist-first-publication/"> [Blog Post]</a> |
@@ -51,7 +55,11 @@ python -c "import torch; import torchvision; import torchaudio; print('torch:', 
 
 ### 3. Poppler (for pdftotext)
 Check with:
-=======
+
+
+----
+
+
 #### Semantic Scholar API (Literature Search)
 
 Our code can optionally use a Semantic Scholar API Key (`S2_API_KEY`) for higher throughput during literature search [if you have one](https://www.semanticscholar.org/product/api). This is used during both the ideation and paper writing stages. The system should work without it, though you might encounter rate limits or reduced novelty checking during ideation. If you experience issues with Semantic Scholar, you can skip the citation phase during paper generation.
@@ -97,7 +105,11 @@ which chktex && chktex --version || echo "chktex missing!"
 ---
 
 ## Example Output (Sollte so aussehen):
-=======
+
+
+----
+
+
 ## Generate Research Ideas
 
 Before running the full AI Scientist-v2 experiment pipeline, you first use the `ai_scientist/perform_ideation_temp_free.py` script to generate potential research ideas. This script uses an LLM to brainstorm and refine ideas based on a high-level topic description you provide, interacting with tools like Semantic Scholar to check for novelty.
@@ -141,7 +153,6 @@ ChkTeX v1.7.6 - Copyright 1995-96 Jens T. Berger Thielemann.
 
 ---
 
-**Führe die Checks jetzt durch:**
 
 ```bash
 python -c "import torch; import torchvision; import torchaudio; print('torch:', torch.__version__, 'cuda:', torch.cuda.is_available())"
@@ -186,8 +197,19 @@ python launch_scientist_bfts.py \
 ```
 
 - To use Anthropic for any step, simply use `claude-3-7-sonnet-20250219` as the model name for that step.
-=======
+
+
+----
+
+
 Example command to run AI-Scientist-v2 using a generated idea file (e.g., `my_research_topic.json`). Please review `bfts_config.yaml` for detailed tree search parameters (the default config includes `claude-3-5-sonnet` for experiments).
+
+
+----
+
+
+Example command to run AI-Scientist-v2 using a generated idea file (e.g., `my_research_topic.json`). Please review `bfts_config.yaml` for detailed tree search parameters (the default config includes `claude-3-5-sonnet` for experiments). Do not set `load_code` if you do not want to initialize experimentation with a code snippet.
+
 
 ```bash
 python launch_scientist_bfts.py \
@@ -235,7 +257,11 @@ This will generate 5 distinct proposals and store them in the same JSON file. Ad
 If you run with the default settings (no `--max-num-generations`), only 1 idea will be generated and stored.
 
 ---
-=======
+
+
+----
+
+
 The AI Scientist-v2 completes experiments with a success rate that depends on the chosen foundation model, and the complexity of the idea. Higher success rates are generally observed when using powerful models like Claude 3.5 Sonnet for the experimentation phase.
 
 **What is the estimated cost per experiment?**
