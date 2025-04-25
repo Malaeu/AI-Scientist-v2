@@ -11,7 +11,6 @@ import openai
 MAX_NUM_TOKENS = 4096
 
 AVAILABLE_LLMS = [
-    # OpenAI and Anthropic (legacy)
     "claude-3-5-sonnet-20240620",
     "claude-3-5-sonnet-20241022",
     # OpenAI models
@@ -48,15 +47,11 @@ AVAILABLE_LLMS = [
     "vertex_ai/claude-3-5-sonnet@20241022",
     "vertex_ai/claude-3-sonnet@20240229",
     "vertex_ai/claude-3-haiku@20240307",
-    # --- ADDED BY USER (2025) ---
-    # Latest OpenAI and Anthropic models
-    "o4-mini-2025-04-16",           # OpenAI, fast/affordable, 2025
-    "gpt-4.1-2025-04-14",           # OpenAI, flagship, 2025
-    "o3-2025-04-16",                # OpenAI, high-capacity, 2025
-    "claude-3-7-sonnet-20250219",   # Anthropic, Sonnet, 2025
+    # Google Gemini models
+    "gemini-2.0-flash",
+    "gemini-2.5-flash-preview-04-17",
+    "gemini-2.5-pro-preview-03-25",
 ]
-# Model pricing and context: see README for up-to-date info.
-
 
 
 # Get N responses from a single message, used for ensembling.
@@ -136,6 +131,23 @@ def get_batch_responses_from_llm(
         new_msg_history = [
             new_msg_history + [{"role": "assistant", "content": c}] for c in content
         ]
+    elif 'gemini' in model:
+        new_msg_history = msg_history + [{"role": "user", "content": msg}]
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_message},
+                *new_msg_history,
+            ],
+            temperature=temperature,
+            max_tokens=MAX_NUM_TOKENS,
+            n=n_responses,
+            stop=None,
+        )
+        content = [r.message.content for r in response.choices]
+        new_msg_history = [
+            new_msg_history + [{"role": "assistant", "content": c}] for c in content
+        ]
     else:
         content, new_msg_history = [], []
         for _ in range(n_responses):
@@ -190,6 +202,7 @@ def make_llm_call(client, model, temperature, system_message, prompt):
             n=1,
             seed=0,
         )
+    
     else:
         raise ValueError(f"Model {model} not supported.")
 
@@ -344,6 +357,20 @@ def get_response_from_llm(
         )
         content = response.choices[0].message.content
         new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
+    elif 'gemini' in model:
+        new_msg_history = msg_history + [{"role": "user", "content": msg}]
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system_message},
+                *new_msg_history,
+            ],
+            temperature=temperature,
+            max_tokens=MAX_NUM_TOKENS,
+            n=1,
+        )
+        content = response.choices[0].message.content
+        new_msg_history = new_msg_history + [{"role": "assistant", "content": content}]
     else:
         raise ValueError(f"Model {model} not supported.")
 
@@ -434,6 +461,15 @@ def create_client(model) -> tuple[Any, str]:
                 base_url="https://openrouter.ai/api/v1",
             ),
             "meta-llama/llama-3.1-405b-instruct",
+        )
+    elif 'gemini' in model:
+        print(f"Using OpenAI API with {model}.")
+        return (
+            openai.OpenAI(
+                api_key=os.environ["GEMINI_API_KEY"],
+                base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+            ),
+            model,
         )
     else:
         raise ValueError(f"Model {model} not supported.")
