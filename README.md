@@ -1,10 +1,12 @@
-## ✅ How to Check Proper Installation (No Conda Required!)
-
-Before running AI Scientist-v2, make sure the following tools and libraries are installed and available in your environment:
-
-
-----
-
+<div align="center">
+  <a href="https://github.com/SakanaAI/AI-Scientist_v2/blob/main/docs/logo_v1.jpg">
+    <img src="docs/logo_v1.png" width="215" alt="AI Scientist v2 Logo" />
+  </a>
+  <h1>
+    <b>The AI Scientist-v2: Workshop-Level Automated</b><br>
+    <b>Scientific Discovery via Agentic Tree Search</b>
+  </h1>
+</div>
 
 <p align="center">
   📚 <a href="https://pub.sakana.ai/ai-scientist-v2/paper">[Paper]</a> |
@@ -40,25 +42,39 @@ This code is designed to run on Linux with NVIDIA GPUs using CUDA and PyTorch.
 
 ### Installation
 
-### 1. Python Packages (in your venv)
-Install with:
 ```bash
+# Create a new conda environment
+conda create -n ai_scientist python=3.11
+conda activate ai_scientist
+
+# Install PyTorch with CUDA support (adjust pytorch-cuda version for your setup)
+conda install pytorch torchvision torchaudio pytorch-cuda=12.4 -c pytorch -c nvidia
+
+# Install PDF and LaTeX tools
+conda install anaconda::poppler
+conda install conda-forge::chktex
+
+# Install Python package requirements
 pip install -r requirements.txt
 ```
 
-### 2. PyTorch, torchvision, torchaudio, CUDA
-Check with:
+### Supported Models and API Keys
+
+#### OpenAI Models
+
+By default, the system uses the `OPENAI_API_KEY` environment variable for OpenAI models.
+
+#### Gemini Models
+
+By default, the system uses the `GEMINI_API_KEY` environment variable for Gemini models through OpenAI API.
+
+#### Claude Models via AWS Bedrock
+
+To use Claude models provided by Amazon Bedrock, install the necessary additional packages:
 ```bash
-python -c "import torch; import torchvision; import torchaudio; print('torch:', torch.__version__, 'cuda:', torch.cuda.is_available())"
+pip install anthropic[bedrock]
 ```
-- Output should show versions and `cuda: True` if you have GPU support.
-
-### 3. Poppler (for pdftotext)
-Check with:
-
-
-----
-
+Next, configure valid [AWS Credentials](https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-envvars.html) and the target [AWS Region](https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-regions.html) by setting the following environment variables: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION_NAME`.
 
 #### Semantic Scholar API (Literature Search)
 
@@ -68,47 +84,13 @@ Our code can optionally use a Semantic Scholar API Key (`S2_API_KEY`) for higher
 
 Ensure you provide the necessary API keys as environment variables for the models you intend to use. For example:
 ```bash
-which pdftotext
-pdftotext -v
+export OPENAI_API_KEY="YOUR_OPENAI_KEY_HERE"
+export S2_API_KEY="YOUR_S2_KEY_HERE"
+# Set AWS credentials if using Bedrock
+# export AWS_ACCESS_KEY_ID="YOUR_AWS_ACCESS_KEY_ID"
+# export AWS_SECRET_ACCESS_KEY="YOUR_AWS_SECRET_KEY"
+# export AWS_REGION_NAME="your-aws-region"
 ```
-- Output should show the path and version.
-- If missing, install with:
-  `sudo apt-get install poppler-utils`
-
-### 4. ChkTeX (for LaTeX linting)
-Check with:
-```bash
-which chktex
-chktex --version
-```
-- Output should show the path and version.
-- If missing, install with:
-  `sudo apt-get install chktex`
-
----
-
-## 🔍 Quick Dependency Check Script
-
-You can copy and run this script to check all dependencies at once:
-
-```bash
-echo "Checking Python packages..."
-python -c "import torch; import torchvision; import torchaudio; print('torch:', torch.__version__, 'cuda:', torch.cuda.is_available())" || echo "PyTorch or related packages missing!"
-
-echo "Checking pdftotext (poppler)..."
-which pdftotext && pdftotext -v || echo "pdftotext (poppler-utils) missing!"
-
-echo "Checking chktex..."
-which chktex && chktex --version || echo "chktex missing!"
-```
-
----
-
-## Example Output (Sollte so aussehen):
-
-
-----
-
 
 ## Generate Research Ideas
 
@@ -143,73 +125,18 @@ Using the JSON file generated in the previous ideation step, you can now launch 
 Specify the models used for the write-up and review phases via command-line arguments.
 The configuration for the best-first tree search (BFTS) is located in `bfts_config.yaml`. Adjust parameters in this file as needed.
 
-```
-torch: 2.2.0 cuda: True
-/usr/bin/pdftotext
-pdftotext version 22.02.0
-/usr/bin/chktex
-ChkTeX v1.7.6 - Copyright 1995-96 Jens T. Berger Thielemann.
-```
+Key tree search configuration parameters in `bfts_config.yaml`:
 
----
-
-
-```bash
-python -c "import torch; import torchvision; import torchaudio; print('torch:', torch.__version__, 'cuda:', torch.cuda.is_available())"
-which pdftotext && pdftotext -v
-which chktex && chktex --version
-```
-
----
-
-If any check fails, install the missing tool as shown above.
-
----
-
-## 🚀 Model Selection Recommendations (2025)
-
-### Choosing the Best LLMs for Agentic Science
-
-Based on the latest benchmarks and pricing, we recommend the following models for different steps in your agentic workflow:
-
-| Step            | Model Name                   | Provider   | Notes                            |
-|-----------------|-----------------------------|------------|----------------------------------|
-| Writeup         | o4-mini-2025-04-16          | OpenAI     | Fast, affordable, good reasoning |
-| Citation        | gpt-4.1-2025-04-14          | OpenAI     | Flagship, high accuracy          |
-| Review          | o3-2025-04-16               | OpenAI     | High capacity, robust            |
-| Plots           | gpt-4.1-2025-04-14          | OpenAI     | Flagship, complex tasks          |
-| Any step        | claude-3-7-sonnet-20250219  | Anthropic  | Latest Claude Sonnet, strong reasoning |
-
-- **Mix and match** these models for maximum performance and cost efficiency.
-- Specify the model for each step using the `--model_writeup`, `--model_citation`, `--model_review`, and `--model_agg_plots` flags.
-- Example launch command:
-
-```bash
-python launch_scientist_bfts.py \
-  --load_ideas ai_scientist/ideas/deep_understanding_mqb_idea_1.json \
-  --load_code \
-  --add_dataset_ref \
-  --model_writeup o4-mini-2025-04-16 \
-  --model_citation gpt-4.1-2025-04-14 \
-  --model_review o3-2025-04-16 \
-  --model_agg_plots gpt-4.1-2025-04-14 \
-  --num_cite_rounds 20
-```
-
-- To use Anthropic for any step, simply use `claude-3-7-sonnet-20250219` as the model name for that step.
-
-
-----
-
-
-Example command to run AI-Scientist-v2 using a generated idea file (e.g., `my_research_topic.json`). Please review `bfts_config.yaml` for detailed tree search parameters (the default config includes `claude-3-5-sonnet` for experiments).
-
-
-----
-
+-   `agent` config:
+    -   Set `num_workers` (number of parallel exploration paths) and `steps` (maximum number of nodes to explore). For example, if `num_workers=3` and `steps=21`, the tree search will explore up to 21 nodes, expanding 3 nodes concurrently at each step.
+    -   `num_seeds`: Should generally be the same as `num_workers` if `num_workers` is less than 3. Otherwise, set `num_seeds` to 3.
+    -   Note: Other agent parameters like `k_fold_validation`, `expose_prediction`, and `data_preview` are not used in the current version.
+-   `search` config:
+    -   `max_debug_depth`: The maximum number of times the agent will attempt to debug a failing node before abandoning that search path.
+    -   `debug_prob`: The probability of attempting to debug a failing node.
+    -   `num_drafts`: The number of initial root nodes (i.e., the number of independent trees to grow) during Stage 1.
 
 Example command to run AI-Scientist-v2 using a generated idea file (e.g., `my_research_topic.json`). Please review `bfts_config.yaml` for detailed tree search parameters (the default config includes `claude-3-5-sonnet` for experiments). Do not set `load_code` if you do not want to initialize experimentation with a code snippet.
-
 
 ```bash
 python launch_scientist_bfts.py \
@@ -225,34 +152,9 @@ python launch_scientist_bfts.py \
 
 Once the initial experimental stage is complete, you will find a timestamped log folder inside the `experiments/` directory. Navigate to `experiments/"timestamp_ideaname"/logs/0-run/` within that folder to find the tree visualization file `unified_tree_viz.html`.
 
-### Model Power & Pricing (2025)
+## Citing The AI Scientist-v2
 
-| Model Name                  | Input $/1M | Output $/1M | Context Window | Max Output | Notes                      |
-|-----------------------------|------------|-------------|---------------|------------|----------------------------|
-| o4-mini-2025-04-16          | $1.10      | $4.40       | 200,000       | 100,000    | Fast, affordable           |
-| gpt-4.1-2025-04-14          | $2.00      | $8.00       | 1,047,576     | 32,768     | Flagship, complex tasks    |
-| o3-2025-04-16               | $10.00     | $40.00      | 200,000       | 100,000    | Most powerful, robust      |
-| claude-3-7-sonnet-20250219  | (see Anthropic pricing) | (see Anthropic pricing) | Large         | Large      | Latest Claude Sonnet       |
-
-
----
-
-**For best results, always use the latest model names and adjust for your workflow needs!**
-
----
-
-## 💡 How Many Ideas Will Be Generated?
-
-By default, the ideation script (`perform_ideation_temp_free.py`) generates **one** idea per run. If you want more ideas in your JSON file, use the `--max-num-generations` flag. For example:
-
-```bash
-python ai_scientist/perform_ideation_temp_free.py \
-  --workshop-file ai_scientist/ideas/deep_understanding_mqb.md \
-  --max-num-generations 5
-
-
-----
-
+If you use **The AI Scientist-v2** in your research, please cite our work as follows:
 
 ```bibtex
 @article{aiscientist_v2,
@@ -261,18 +163,11 @@ python ai_scientist/perform_ideation_temp_free.py \
   journal={arXiv preprint arXiv:2504.08066},
   year={2025}
 }
-
 ```
 
-This will generate 5 distinct proposals and store them in the same JSON file. Adjust the number as needed for your workflow.
+## Frequently Asked Questions
 
-If you run with the default settings (no `--max-num-generations`), only 1 idea will be generated and stored.
-
----
-
-
-----
-
+**Why wasn't a PDF or a review generated for my experiment?**
 
 The AI Scientist-v2 completes experiments with a success rate that depends on the chosen foundation model, and the complexity of the idea. Higher success rates are generally observed when using powerful models like Claude 3.5 Sonnet for the experimentation phase.
 
