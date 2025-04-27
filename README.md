@@ -20,7 +20,7 @@ We are excited to introduce The AI Scientist-v2, a generalized end-to-end agenti
 This system autonomously generates hypotheses, runs experiments, analyzes data, and writes scientific manuscripts. Unlike [its predecessor](https://github.com/SakanaAI/AI-Scientist), the AI Scientist-v2 removes reliance on human-authored templates, generalizes across ML domains, and employs a progressive agentic tree-search guided by an experiment manager agent.
 
 > **Note:**
-> The AI Scientist-v2 doesn’t necessarily produce better papers than v1, especially when a strong starting template is available. V1 follows well-defined templates, leading to high success rates, while v2 takes a broader, more exploratory approach with lower success rates. V1 works best for tasks with clear objectives and a solid foundation, whereas v2 is designed for open-ended scientific exploration.
+> The AI Scientist-v2 doesn't necessarily produce better papers than v1, especially when a strong starting template is available. V1 follows well-defined templates, leading to high success rates, while v2 takes a broader, more exploratory approach with lower success rates. V1 works best for tasks with clear objectives and a solid foundation, whereas v2 is designed for open-ended scientific exploration.
 
 > **Caution!**
 > This codebase will execute LLM-written code. There are various risks and challenges associated with this autonomy, including the use of potentially dangerous packages, web access, and potential spawning of processes. Use at your own discretion.
@@ -142,3 +142,125 @@ You can update your idea JSON file to suggest using a smaller model.
 ## Acknowledgement
 
 The tree search component inside `ai_scientist` is built on top of [AIDE](https://github.com/WecoAI/aideml). We thank the AIDE developers for their valuable contributions and for sharing their work.
+
+# BC-MELD Score Analysis
+
+Этот проект содержит скрипты для подготовки и анализа данных Body Composition Assisted MELD (BC-MELD) Score. Анализ включает в себя оценку влияния параметров состава тела на прогноз выживаемости пациентов в листе ожидания трансплантации печени.
+
+## Структура проекта
+
+```
+.
+├── prepare_rds_data.py    # Скрипт подготовки данных
+├── analyze_bc_meld.py     # Скрипт анализа данных
+├── prepared_data/         # Директория с подготовленными данными
+│   ├── prepared_experiment_data.parquet
+│   ├── analysis_ready_data.parquet
+│   └── data_metadata.json
+└── analysis_results/      # Директория с результатами анализа
+    ├── analysis_results.json
+    ├── km_curves_*.png
+    └── roc_curve_*.png
+```
+
+## Требования
+
+- Python 3.8+
+- pandas
+- numpy
+- pyreadr
+- fastparquet
+- lifelines
+- scikit-learn
+- matplotlib
+- seaborn
+
+## Установка зависимостей
+
+```bash
+pip install pandas numpy pyreadr fastparquet lifelines scikit-learn matplotlib seaborn
+```
+
+## Использование
+
+### 1. Подготовка данных
+
+Запустите скрипт подготовки данных:
+
+```bash
+python prepare_rds_data.py
+```
+
+Скрипт выполнит:
+- Загрузку RDS файлов
+- Объединение и очистку данных
+- Создание метаданных
+- Сохранение данных в формате Parquet
+
+### 2. Анализ данных
+
+После подготовки данных запустите скрипт анализа:
+
+```bash
+python analyze_bc_meld.py
+```
+
+Скрипт выполнит:
+- Cox регрессию для разных моделей
+- Kaplan-Meier анализ
+- ROC анализ для разных временных точек
+- Стратифицированный анализ по MELD группам
+
+## Модели анализа
+
+1. MELD only
+   - Базовая модель только с MELD score
+   - Формула: `lab_meld`
+
+2. MELD + LowAMVI
+   - MELD с добавлением LowAMVI, возраста и пола
+   - Формула: `lab_meld + low_AMVI + age + sex`
+
+3. BC-MELD-VA
+   - Полная модель с всеми параметрами состава тела
+   - Формула: `lab_meld + low_AMVI + high_IMAC + high_VSR + age + sex`
+
+## Результаты анализа
+
+Результаты сохраняются в директории `analysis_results/`:
+
+1. `analysis_results.json`
+   - Результаты всех анализов в формате JSON
+   - Включает метаданные, результаты моделей, ROC анализ и стратифицированный анализ
+
+2. Графики
+   - `km_curves_*.png` - Kaplan-Meier кривые для разных группировок
+   - `roc_curve_*.png` - ROC кривые для разных моделей и временных точек
+
+## Интерпретация результатов
+
+### Cox регрессия
+- Hazard Ratios показывают относительный риск
+- p-values < 0.05 считаются статистически значимыми
+- Concordance Index (C-index) показывает дискриминационную способность модели
+
+### Kaplan-Meier анализ
+- Кривые выживаемости показывают вероятность выживания во времени
+- Log-rank test используется для сравнения кривых
+
+### ROC анализ
+- AUC (Area Under Curve) показывает дискриминационную способность
+- Значения > 0.7 считаются хорошими, > 0.8 отличными
+
+### Стратифицированный анализ
+- Показывает различия в эффектах между группами MELD
+- Помогает определить, где модель работает лучше
+
+## Примечания
+
+- Все временные точки указаны в месяцах
+- MELD группы определяются как low (< 15) и high (≥ 15)
+- Параметры состава тела:
+  - Low AMVI: < 2139.32 cm³/m²
+  - High IMAC: ≥ 0.147
+  - High VSR: ≥ 0.393

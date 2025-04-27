@@ -6,7 +6,7 @@ from funcy import notnone, once, select_values
 import anthropic
 
 # _client: anthropic.Anthropic = None  # type: ignore
-_client: anthropic.AnthropicBedrock = None  # type: ignore
+_client: anthropic.Anthropic = None  # type: ignore
 
 ANTHROPIC_TIMEOUT_EXCEPTIONS = (
     anthropic.RateLimitError,
@@ -20,8 +20,7 @@ ANTHROPIC_TIMEOUT_EXCEPTIONS = (
 @once
 def _setup_anthropic_client():
     global _client
-    # _client = anthropic.Anthropic(max_retries=0)
-    _client = anthropic.AnthropicBedrock(max_retries=0)
+    _client = anthropic.Anthropic(max_retries=0)
 
 
 def query(
