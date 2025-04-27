@@ -1,0 +1,177 @@
+[
+    {
+        "Name": "meld_bca_improvement",
+        "Title": "Enhancing MELD Score Prediction with Body Composition Analysis: A Novel Approach to Liver Transplant Prioritization",
+        "Short Hypothesis": "Incorporating body composition analysis (BCA) parameters into the MELD score can significantly improve its predictive accuracy for mortality in liver transplant candidates, particularly in cases where standard MELD may underestimate risk.",
+        "Data": {
+            "Main Dataset": "data/wl_df_bca_classified.rds",
+            "Volume Dataset": "data/wl_df_bca_final_volume.rds",
+            "Time Variable": "surv_time_months",
+            "Status Variable": "surv_status",
+            "BCA Parameters": {
+                "AMVI": "muscle / (height_m^2)",
+                "VSR": "vat / sat",
+                "IMAC": "imat / muscle",
+                "FSM_Ratio": "sat / muscle",
+                "FVM_Ratio": "vat / muscle"
+            },
+            "Thresholds": {
+                "AMVI": "< 2139.32 cm³/m²",
+                "IMAC": "≥ 0.147",
+                "VSR": "≥ 0.393"
+            }
+        },
+        "Experiments": [
+            {
+                "Name": "Phase 1: BC-MELD-VA Model Optimization",
+                "Description": "Optimization of baseline BC-MELD-VA models and integration of clinical complications",
+                "Steps": [
+                    {
+                        "Name": "Baseline Model H4+",
+                        "Description": "Optimized base version of BC-MELD-VA model by removing non-significant high_VSR parameter",
+                        "Formula": "Surv(surv_time, surv_status) ~ lab_meld + age + sex + low_AMVI + high_IMAC"
+                    },
+                    {
+                        "Name": "Clinical Complications Integration",
+                        "Description": "Model improvement by adding clinically relevant complications",
+                        "Formula": "Surv(surv_time, surv_status) ~ lab_meld + age + sex + low_AMVI + high_IMAC + has_ascites + has_encephalopathy"
+                    },
+                    {
+                        "Name": "Interaction Analysis",
+                        "Description": "Testing interactions between BCA parameters and clinical complications",
+                        "Models": [
+                            "Model_H4+_Clin + low_AMVI:has_ascites + low_AMVI:has_encephalopathy",
+                            "Model_H4+_Clin + high_IMAC:has_ascites + high_IMAC:has_encephalopathy",
+                            "Model_H4+_Clin + low_AMVI:high_IMAC"
+                        ],
+                        "Method": "Likelihood Ratio Tests (LRT)"
+                    }
+                ]
+            },
+            {
+                "Name": "Phase 2: New BCA Parameters Investigation",
+                "Description": "Investigation of continuous BCA parameters and additional fat depots",
+                "Steps": [
+                    {
+                        "Name": "Continuous BCA Parameters",
+                        "Description": "Testing if continuous BCA parameters perform better than binary classifications",
+                        "Formula": "Surv(surv_time, surv_status) ~ lab_meld + age + sex + pspline(AMVI) + pspline(IMAC) + has_ascites + has_encephalopathy"
+                    },
+                    {
+                        "Name": "Additional Fat Depots",
+                        "Description": "Investigation of prognostic value of other fat depots (EAT_Index, PAT_Index)"
+                    },
+                    {
+                        "Name": "Fat/Muscle Ratios",
+                        "Description": "Investigation of prognostic value of fat/muscle ratios (FSM_Ratio, FVM_Ratio)"
+                    }
+                ]
+            },
+            {
+                "Name": "Phase 3: Final Model Selection and Interpretation",
+                "Description": "Selection of best model and comprehensive interpretation of results",
+                "Steps": [
+                    {
+                        "Name": "Final Model Selection",
+                        "Description": "Selection of best model balancing accuracy and interpretability",
+                        "Method": "Compare all models from Phase 1 and 2 based on C-Index and LRT"
+                    },
+                    {
+                        "Name": "In-depth Interpretation",
+                        "Description": "Comprehensive understanding of model mechanics and individual factor contributions",
+                        "Methods": [
+                            "Variable Importance Plot (VIP)",
+                            "Partial Dependence Plots (PDP)",
+                            "Individual Conditional Expectation (ICE)",
+                            "Interaction Visualization"
+                        ]
+                    }
+                ]
+            }
+        ],
+        "Analysis Plan": {
+            "Phase 1": {
+                "Title": "Optimization of BC-MELD-VA Models",
+                "Steps": [
+                    {
+                        "Name": "Model H4+ (Baseline)",
+                        "Formula": "Surv(surv_time, surv_status) ~ lab_meld + age + sex + low_AMVI + high_IMAC",
+                        "Description": "Optimized base version of BC-MELD-VA model by removing non-significant high_VSR parameter"
+                    },
+                    {
+                        "Name": "Clinical Complications Integration",
+                        "Formula": "Surv(surv_time, surv_status) ~ lab_meld + age + sex + low_AMVI + high_IMAC + has_ascites + has_encephalopathy",
+                        "Description": "Model improvement by adding clinically relevant complications"
+                    },
+                    {
+                        "Name": "Interaction Analysis",
+                        "Models": [
+                            "Model_H4+_Clin + low_AMVI:has_ascites + low_AMVI:has_encephalopathy",
+                            "Model_H4+_Clin + high_IMAC:has_ascites + high_IMAC:has_encephalopathy",
+                            "Model_H4+_Clin + low_AMVI:high_IMAC"
+                        ],
+                        "Method": "Likelihood Ratio Tests (LRT)"
+                    }
+                ]
+            },
+            "Phase 2": {
+                "Title": "Investigation of New BCA Parameters",
+                "Steps": [
+                    {
+                        "Name": "Continuous BCA Parameters",
+                        "Formula": "Surv(surv_time, surv_status) ~ lab_meld + age + sex + pspline(AMVI) + pspline(IMAC) + has_ascites + has_encephalopathy",
+                        "Description": "Testing if continuous BCA parameters perform better than binary classifications"
+                    },
+                    {
+                        "Name": "Additional Fat Depots",
+                        "Description": "Investigation of prognostic value of other fat depots (EAT_Index, PAT_Index)"
+                    },
+                    {
+                        "Name": "Fat/Muscle Ratios",
+                        "Description": "Investigation of prognostic value of fat/muscle ratios (FSM_Ratio, FVM_Ratio)"
+                    }
+                ]
+            },
+            "Phase 3": {
+                "Title": "Final Model and Interpretation",
+                "Steps": [
+                    {
+                        "Name": "Final Model Selection",
+                        "Method": "Compare all models from Phase 1 and 2 based on C-Index and LRT",
+                        "Description": "Selection of best model balancing accuracy and interpretability"
+                    },
+                    {
+                        "Name": "In-depth Interpretation",
+                        "Methods": [
+                            "Variable Importance Plot (VIP)",
+                            "Partial Dependence Plots (PDP)",
+                            "Individual Conditional Expectation (ICE)",
+                            "Interaction Visualization"
+                        ],
+                        "Description": "Comprehensive understanding of model mechanics and individual factor contributions"
+                    }
+                ]
+            }
+        },
+        "Expected Results": {
+            "Model Performance": {
+                "Current C-Index": 0.636,
+                "Expected Improvement": "Significant improvement, especially in low MELD score patients (<15)",
+                "Previous BC-MELD-VA C-Index": 0.708
+            },
+            "Key Findings": [
+                "Low AMVI shows protective effect (HR = 0.47, p = 0.014)",
+                "High IMAC identified as risk factor (HR = 1.83, p = 0.016)",
+                "BC-MELD-VA score particularly effective in low MELD score patients"
+            ]
+        },
+        "Related Work": "The Model for End-Stage Liver Disease (MELD) score is widely used for liver transplant prioritization, but has known limitations. Previous studies have shown that body composition metrics correlate with survival, but there hasn't been a comprehensive integration of BCA parameters into the MELD scoring system.",
+        "Abstract": "This study aims to optimize the BC-MELD (Body Composition MELD) models by systematically analyzing and integrating body composition parameters. Using two comprehensive datasets with classified and volumetric BCA parameters, we develop and validate improved predictive models for mortality in liver transplant candidates. Our approach includes three phases: optimization of existing BC-MELD-VA models, investigation of new BCA parameters, and final model selection with in-depth interpretation. The analysis particularly focuses on improving prediction accuracy while maintaining model interpretability.",
+        "Risk Factors and Limitations": [
+            "Need for standardization of BCA measurements",
+            "Potential complexity in implementing modified scoring system",
+            "Sample size and demographic composition may affect generalizability",
+            "Need for external validation in different patient populations"
+        ]
+    }
+]
