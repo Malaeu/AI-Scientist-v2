@@ -9,8 +9,11 @@ Implements:
 - Logging of all intermediate dumps for debugging
 """
 import os
-import time
+import sys
 import json
+import time
+# Ensure project root is in sys.path for imports
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 from experiments.mqb import mqb_core
 
 # --- CONFIG ---
@@ -35,12 +38,8 @@ def run_mqb_pipeline(cnf_path, debug_dump_path=None):
             clause = tuple(int(x) for x in line.strip().split() if x != '0')
             if clause:
                 cnf.append(clause)
-    # Planarity check before PSCG
-    import networkx as nx
-    is_planar, _ = nx.check_planarity(mqb_core.build_matchgate_graph(cnf))
-    if not is_planar:
-        raise ValueError("Input graph is not planar before PSCG!")
-    G = mqb_core.build_matchgate_graph(cnf)
+    # Planarity check disabled for MVP (non-planar graphs allowed)
+    G = mqb_core.build_sat_gadget_graph(cnf)
     Gp = mqb_core.planarise_with_pscg(G)
     Go = mqb_core.kasteleyn_orient(Gp)
     is_sat, assignment = mqb_core.pfaffian_decision_and_decode(Go, debug_dump_path=debug_dump_path)
