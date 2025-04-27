@@ -1,0 +1,11 @@
+{
+  "|V|": 5,
+  "|E|": 4,
+  "#PSC-pairs": 0,
+  "Pf(K)": 2,
+  "is_sat": true,
+  "assignment": {
+    "1": false,
+    "2": true
+  }
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "Name": "mqb_sat_validation",
+    "Title": "Agentic Validation of the Metainformational Quantum Bridge (MQB) for SAT Solving",
+    "Short Hypothesis": "The Metainformational Quantum Bridge (MQB) can solve SAT problems by reducing them to perfect matching problems in planar graphs via a classical gadget-based reduction, enabling rigorous agentic validation against MiniSat.",
+    "Related Work": "Classical SAT solvers (e.g., MiniSat) use CDCL algorithms. The MQB approach leverages the established Lichtenstein/planar 3-SAT reduction: variable-cycle gadgets, clause-OR gadgets, planarity enforcement, and Pfaffian computation. Prior MQB experiments used a bipartite reduction, which is incorrect for general SAT; this protocol corrects that.",
+    "Abstract": "This project validates the MQB approach for SAT by implementing a classical SAT→PerfMatch reduction (variable-cycle gadgets, clause-OR gadgets, planarity, PSCG insertion, Kasteleyn orientation, Pfaffian computation, and proper decoding). We benchmark MQB against MiniSat on random and benchmark CNFs, analyze SAT/UNSAT agreement, assignment decoding, and runtime, and generate agentic reports.",
+    "Experiments": [
+      "Implement the correct SAT→PerfMatch reduction: variable-cycle gadgets for variables, clause-OR gadgets for clauses, with non-intersecting paths.",
+      "Insert planarity gadgets (PSCG) at each crossing after building the SAT gadgets.",
+      "Apply Kasteleyn orientation using a planarity embedding.",
+      "Construct the Kasteleyn matrix K and compute Pf(K) via sqrt(det(K)). SAT iff Pf(K) ≠ 0.",
+      "Extract a satisfying assignment from a perfect matching (PM) by decoding variable ports.",
+      "Compare MQB SAT/UNSAT and assignments to MiniSat, and log all intermediate data (|V|, |E|, #PSCG, Pf(K))."
+    ],
+    "Risk Factors and Limitations": [
+      "Reduction and planarity gadget implementation is nontrivial and may introduce bugs.",
+      "Pfaffian computation for large graphs is computationally intensive.",
+      "Assignment decoding from PM may be ambiguous in rare cases.",
+      "Agentic pipeline must be able to handle failures and log all intermediate steps for debugging."
+    ]
+  }
+]

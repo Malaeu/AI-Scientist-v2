@@ -77,17 +77,27 @@ ARGUMENTS:
 If you choose to finalize your idea, provide the IDEA JSON in the arguments:
 
 IDEA JSON:
-```json
+The output MUST be in the following format (no markdown code fences, no extra commentary):
+
+ACTION:
+FinalizeIdea
+
+ARGUMENTS:
 {{
+  "idea": {{
     "Name": "...",
     "Title": "...",
     "Short Hypothesis": "...",
     "Related Work": "...",
     "Abstract": "...",
-    "Experiments": "...",
-    "Risk Factors and Limitations": "..."
+    "Experiments": ["...", "..."],
+    "Risk Factors and Limitations": ["...", "..."]
+  }}
 }}
-```
+
+- Do not include markdown code fences or any text outside this structure.
+- 'Experiments' and 'Risk Factors and Limitations' MUST be arrays of strings.
+- Use the ACTION/ARGUMENTS headers exactly as shown.
 
 Ensure the JSON is properly formatted for automatic parsing.
 
@@ -207,7 +217,6 @@ def generate_temp_free_idea(
                         json.loads(arguments_text)
                     except Exception:
                         # Fallback: extract the first JSON object from the string
-                        import re
                         json_match = re.search(r'\{[\s\S]*?\}', arguments_text)
                         if json_match:
                             arguments_text = json_match.group(0)

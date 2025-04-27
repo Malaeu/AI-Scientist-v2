@@ -4,31 +4,34 @@
 Agentic Validation of the Metainformational Quantum Bridge (MQB) for SAT
 
 ## Keywords
-SAT solving, Metainformational Quantum Bridge, matchgate, perfect matching, agentic pipeline, P=NP
+SAT solving, Metainformational Quantum Bridge, matchgate, perfect matching, agentic pipeline, P=NP, variable-cycle, clause-gadget, planarity, Pfaffian
 
 ## Abstract
-The Metainformational Quantum Bridge (MQB) is a novel approach to solving Boolean satisfiability (SAT) problems by reducing them to perfect matching problems in planar graphs. This project aims to validate the MQB pipeline on a range of CNF formulas, benchmark its performance and correctness against established SAT solvers such as MiniSat, and analyze its potential implications for the P=NP question. The research will use a fully agentic, autonomous pipeline for experiment execution, result analysis, and report generation, following the AI Scientist-v2 methodology. Key objectives include verifying the correctness of MQB's SAT/UNSAT decisions, the accuracy of its assignment decoding, and its agreement with ground-truth solutions and MiniSat outputs.
+This project validates the MQB approach for SAT by implementing a classical SAT→PerfMatch reduction (variable-cycle gadgets, clause-OR gadgets, planarity, PSCG insertion, Kasteleyn orientation, Pfaffian computation, and proper decoding). We benchmark MQB against MiniSat on random and benchmark CNFs, analyze SAT/UNSAT agreement, assignment decoding, and runtime, and generate agentic reports.
 
 ## Motivation
-SAT is a central NP-complete problem. If MQB can solve SAT efficiently via perfect matchings, it would have deep theoretical and practical significance. Validating MQB's claims requires rigorous, automated experimentation and benchmarking.
+Correct SAT→PerfMatch reduction is required for valid agentic benchmarking. Previous bipartite approaches fail for m > n. Classical gadget-based reduction (Lichtenstein/planar 3-SAT) ensures correctness and allows rigorous comparison to MiniSat.
 
 ## Research Questions
-- Does MQB correctly decide SAT/UNSAT for small and medium CNF instances?
-- Are MQB's decoded assignments consistent with all satisfying assignments?
-- How does MQB's performance and correctness compare to MiniSat?
-- Can the agentic pipeline autonomously generate publishable reports from experiment results?
+- Does MQB (with correct reduction) agree with MiniSat on SAT/UNSAT for random and benchmark CNFs?
+- Is assignment decoding from PM reliable and consistent with MiniSat?
+- What is the runtime and scaling behavior of the full MQB pipeline?
+- Can the agentic pipeline autonomously generate publishable, debug-friendly reports?
 
 ## Experiment Plan
-- Implement the MQB pipeline (graph construction, planarization, orientation, Pfaffian decoding)
-- Run MQB and MiniSat on batches of CNFs
-- Analyze assignment agreement and SAT/UNSAT decision accuracy
-- Generate plots and auto-write a scientific report
+- Implement the correct SAT→PerfMatch reduction: variable-cycle gadgets for variables, clause-OR gadgets for clauses, with non-intersecting paths.
+- Insert planarity gadgets (PSCG) at each crossing after building the SAT gadgets.
+- Apply Kasteleyn orientation using a planarity embedding.
+- Construct the Kasteleyn matrix K and compute Pf(K) via sqrt(det(K)). SAT iff Pf(K) ≠ 0.
+- Extract a satisfying assignment from a perfect matching (PM) by decoding variable ports.
+- Compare MQB SAT/UNSAT and assignments to MiniSat, and log all intermediate data (|V|, |E|, #PSCG, Pf(K)).
 
 ## Data
 - Hand-crafted CNFs (from experiments/mqb/run_experiment.py)
-- (Optional) Larger CNFs from SATLIB or other benchmarks
+- Random 3-SAT CNFs (n ≤ 20) for unit tests
+- SATLIB and other benchmarks
 
 ## Expected Output
 - Structured experiment logs, result summaries, plots, and a Markdown report
-- Automated validation of MQB claims
-- Recommendations for further research
+- Automated validation of MQB claims, including full debug dumps
+- Recommendations for further research and debugging
