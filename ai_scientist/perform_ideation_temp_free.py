@@ -169,7 +169,7 @@ def generate_temp_free_idea(
                     )
 
                 response_text, msg_history = get_response_from_llm(
-                    msg=prompt_text,
+                    prompt=prompt_text,
                     client=client,
                     model=model,
                     system_message=system_prompt,
@@ -202,6 +202,15 @@ def generate_temp_free_idea(
                         arguments_text = re.search(
                             r"```json\s*(.*?)\s*```", arguments_text, re.DOTALL
                         ).group(1)
+                    # If arguments_text is still not valid JSON, try to extract the first JSON object
+                    try:
+                        json.loads(arguments_text)
+                    except Exception:
+                        # Fallback: extract the first JSON object from the string
+                        import re
+                        json_match = re.search(r'\{[\s\S]*?\}', arguments_text)
+                        if json_match:
+                            arguments_text = json_match.group(0)
 
                     # Process the action and arguments
                     if action in tools_dict:

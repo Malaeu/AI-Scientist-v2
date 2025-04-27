@@ -11,6 +11,7 @@ import openai
 MAX_NUM_TOKENS = 4096
 
 AVAILABLE_LLMS = [
+    # OpenAI and Anthropic (legacy)
     "claude-3-5-sonnet-20240620",
     "claude-3-5-sonnet-20241022",
     "gpt-4o-mini-2024-07-18",
@@ -34,7 +35,15 @@ AVAILABLE_LLMS = [
     "vertex_ai/claude-3-5-sonnet@20241022",
     "vertex_ai/claude-3-sonnet@20240229",
     "vertex_ai/claude-3-haiku@20240307",
+    # --- ADDED BY USER (2025) ---
+    # Latest OpenAI and Anthropic models
+    "o4-mini-2025-04-16",           # OpenAI, fast/affordable, 2025
+    "gpt-4.1-2025-04-14",           # OpenAI, flagship, 2025
+    "o3-2025-04-16",                # OpenAI, high-capacity, 2025
+    "claude-3-7-sonnet-20250219",   # Anthropic, Sonnet, 2025
 ]
+# Model pricing and context: see README for up-to-date info.
+
 
 
 # Get N responses from a single message, used for ensembling.

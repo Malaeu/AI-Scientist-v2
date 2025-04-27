@@ -1,0 +1,45 @@
+{
+  "title": "Agentic Validation of the Metainformational Quantum Bridge (MQB) for SAT",
+  "objective": "To rigorously test, benchmark, and analyze the MQB algorithm for SAT solving using a fully agentic, autonomous pipeline. The pipeline will compare MQB to MiniSat, generate plots, and auto-write a report, following the AI Scientist-v2 methodology.",
+  "hypotheses": [
+    "The MQB algorithm correctly identifies SAT/UNSAT status for a range of CNF formulas.",
+    "MQB's decoded assignments are consistent with ground-truth SAT solutions.",
+    "MQB matches or approaches MiniSat's performance on small-to-medium CNFs."
+  ],
+  "experiment_plan": {
+    "pipeline_steps": [
+      "Build matchgate graph from CNF",
+      "Planarize with paired sign-cross gadgets (PSCG)",
+      "Apply Kasteleyn orientation",
+      "Decode SAT status and assignment via Pfaffian/matching",
+      "Run MiniSat baseline and compare results",
+      "Generate SAT/UNSAT comparison plots",
+      "Auto-write Markdown report with results and analysis"
+    ],
+    "test_cases": "Use the batch of CNFs defined in experiments/mqb/run_experiment.py."
+  },
+  "data_sources": [
+    "Hand-crafted CNFs in run_experiment.py",
+    "(Optional) Larger CNF benchmarks from SATLIB or other sources"
+  ],
+  "code_reference": "experiments/mqb/run_experiment.py",
+  "output_spec": {
+    "logs": "experiments/mqb/logs/experiment_log.txt",
+    "summary_json": "experiments/mqb/analysis_results/summary.json",
+    "plots": "experiments/mqb/analysis_results/sat_comparison.png",
+    "report": "experiments/mqb/analysis_results/report.md"
+  },
+  "agentic_tasks": [
+    "Run the full experiment pipeline autonomously",
+    "Analyze agreement/disagreement between MQB and MiniSat",
+    "Highlight any anomalies or failures",
+    "Summarize findings in a human-readable report",
+    "Suggest next steps or further experiments"
+  ],
+  "review_criteria": [
+    "Correctness of SAT/UNSAT classification",
+    "Assignment agreement with ground truth",
+    "Clarity and completeness of report",
+    "Reproducibility of pipeline"
+  ]
+}

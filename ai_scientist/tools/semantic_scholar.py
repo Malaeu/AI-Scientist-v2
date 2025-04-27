@@ -7,13 +7,11 @@ import backoff
 
 from ai_scientist.tools.base_tool import BaseTool
 
-
 def on_backoff(details: Dict) -> None:
     print(
         f"Backing off {details['wait']:0.1f} seconds after {details['tries']} tries "
         f"calling function {details['target'].__name__} at {time.strftime('%X')}"
     )
-
 
 class SemanticScholarSearchTool(BaseTool):
     def __init__(
@@ -35,12 +33,18 @@ class SemanticScholarSearchTool(BaseTool):
         super().__init__(name, description, parameters)
         self.max_results = max_results
         self.S2_API_KEY = os.getenv("S2_API_KEY")
-        if not self.S2_API_KEY:
-            raise ValueError(
-                "Semantic Scholar API key not found. Please set the S2_API_KEY environment variable."
-            )
+        self.enabled = bool(self.S2_API_KEY)
+        self.request_count = 0
+        if not self.enabled:
+            print("Warning: Semantic Scholar API key not set. Tool will be disabled and will return a stub response.")
 
     def use_tool(self, query: str) -> Optional[str]:
+        if not self.enabled:
+            return "Semantic Scholar search not available (no API key set)."
+        self.request_count += 1
+        delay = min(5 * self.request_count, 15)
+        print(f"[SemanticScholar] Sleeping for {delay}s before request #{self.request_count}.")
+        time.sleep(delay)
         papers = self.search_for_papers(query)
         if papers:
             return self.format_papers(papers)
@@ -64,16 +68,12 @@ class SemanticScholarSearchTool(BaseTool):
                 "fields": "title,authors,venue,year,abstract,citationCount",
             },
         )
-        print(f"Response Status Code: {rsp.status_code}")
-        print(f"Response Content: {rsp.text[:500]}")
         rsp.raise_for_status()
         results = rsp.json()
         total = results.get("total", 0)
         if total == 0:
             return None
-
         papers = results.get("data", [])
-        # Sort papers by citationCount in descending order
         papers.sort(key=lambda x: x.get("citationCount", 0), reverse=True)
         return papers
 
@@ -84,22 +84,21 @@ class SemanticScholarSearchTool(BaseTool):
                 [author.get("name", "Unknown") for author in paper.get("authors", [])]
             )
             paper_strings.append(
-                f"""{i + 1}: {paper.get("title", "Unknown Title")}. {authors}. {paper.get("venue", "Unknown Venue")}, {paper.get("year", "Unknown Year")}.
-Number of citations: {paper.get("citationCount", "N/A")}
-Abstract: {paper.get("abstract", "No abstract available.")}"""
+                f"""{i + 1}: {paper.get('title', 'Unknown Title')}. {authors}. {paper.get('venue', 'Unknown Venue')}, {paper.get('year', 'Unknown Year')}.
+Number of citations: {paper.get('citationCount', 'N/A')}
+Abstract: {paper.get('abstract', 'No abstract available.')}"""
             )
         return "\n\n".join(paper_strings)
 
-
+# Deprecated function, kept for compatibility
 @backoff.on_exception(
     backoff.expo, requests.exceptions.HTTPError, on_backoff=on_backoff
 )
 def search_for_papers(query, result_limit=10) -> Union[None, List[Dict]]:
     S2_API_KEY = os.getenv("S2_API_KEY")
     if not S2_API_KEY:
-        raise ValueError(
-            "Semantic Scholar API key not found. Please set the S2_API_KEY environment variable."
-        )
+        print("Semantic Scholar API key not found. Skipping Semantic Scholar search.")
+        return None
     if not query:
         return None
     rsp = requests.get(
@@ -121,6 +120,5 @@ def search_for_papers(query, result_limit=10) -> Union[None, List[Dict]]:
     time.sleep(1.0)
     if not total:
         return None
-
     papers = results["data"]
     return papers
